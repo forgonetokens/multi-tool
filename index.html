@@ -3,549 +3,73 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta name="theme-color" content="#0e0e10">
-<meta name="description" content="CMD Palette — a lightweight macOS menu bar app that launches dev projects, copies terminal commands, and starts dev servers with one click. Built with Tauri.">
-<title>multi-tool — Small tools for developers</title>
-<link rel="dns-prefetch" href="https://buy.stripe.com">
-<link rel="preconnect" href="https://buy.stripe.com" crossorigin>
+<meta name="theme-color" content="#0d0a08">
+<meta name="description" content="forgonetokens — pieces of the past, back with new value. Writing, tools, and signal.">
+<title>forgonetokens</title>
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  html { scroll-behavior: smooth; }
-  @media (prefers-reduced-motion: reduce) {
-    html { scroll-behavior: auto; }
-    .win-banner:not(.hidden) { animation: none; }
-    .unlock-card { transition: none; }
-    .download-section { transition: none; }
-  }
 
   :root {
     color-scheme: dark;
-    --bg: #0e0e10;
-    --surface: #18181b;
-    --surface2: #222226;
-    --border: #2e2e33;
-    --text: #e4e4e7;
-    --text-muted: #8b8b94;
-    --accent: #a78bfa;
-    --accent-dim: #7c5cbf;
-    --green: #4ade80;
-    --red: #f87171;
-    --yellow: #fbbf24;
-    --radius: 8px;
+
+    /* ── Environment ── */
+    --env-void:       #0d0a08;
+    --env-dark:       #1a1410;
+
+    /* ── Cabinet ── */
+    --cab-body:       #2a2118;
+    --cab-accent:     #3d3228;
+    --cab-highlight:  #5c4a3a;
+
+    /* ── Amber (the light source) ── */
+    --amber:          #d4a056;
+    --amber-bright:   #ff9d3a;
+    --amber-dim:      #8a6830;
+
+    /* ── Text ── */
+    --text-primary:   #e8dcc8;
+    --text-secondary: #a89880;
+
+    /* ── Screen ── */
+    --screen-bg:      #1a1612;
+    --screen-glow:    rgba(212, 160, 86, 0.15);
+
+    /* ── Semantic ── */
+    --alert:          #d0623f;
+    --success:        #7ab56a;
+
+    /* ── Radii ── */
+    --radius-sm:      4px;
+    --radius-md:      8px;
+    --radius-lg:      16px;
+    --radius-screen:  12px;
+
+    /* ── Typography ── */
+    --font-mono: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+    --type-marquee: clamp(28px, 4vw, 48px);
+    --type-nav: clamp(14px, 2vw, 18px);
+    --type-detail: 11px;
   }
 
   body {
-    font-family: 'SF Mono', 'Cascadia Code', 'Fira Code', 'JetBrains Mono', monospace;
-    background: var(--bg);
-    color: var(--text);
+    font-family: var(--font-mono);
+    background: var(--env-void);
+    color: var(--text-primary);
     line-height: 1.6;
     -webkit-font-smoothing: antialiased;
+    overflow: hidden;
+    height: 100vh;
   }
-
-  a { color: var(--accent); text-decoration: none; }
-  a:hover { text-decoration: underline; }
-
-  .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
-
-  /* ── Utilities ── */
-  .hidden { display: none; }
-
-  code, .kbd {
-    background: var(--surface2);
-    border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 1px 6px;
-    font-size: 12px;
-    color: var(--text);
-  }
-  .hero-jump-link { margin-top: 16px; }
-  .hero-jump-link a { font-size: 13px; letter-spacing: 0.5px; }
-
-  /* ── Site Hero ── */
-  .site-hero {
-    padding: 80px 0 24px;
-    text-align: center;
-  }
-  .site-hero h1 {
-    font-size: 40px;
-    font-weight: 700;
-    letter-spacing: -1px;
-    margin-bottom: 12px;
-  }
-  .site-hero h1 span { color: var(--accent); }
-  .site-hero p {
-    color: var(--text-muted);
-    font-size: 15px;
-    max-width: 480px;
-    margin: 0 auto;
-  }
-  .site-divider {
-    border: none;
-    border-top: 1px solid var(--border);
-    margin: 48px 0;
-  }
-
-  /* ── Tool Hero ── */
-  .tool-hero {
-    margin-bottom: 40px;
-  }
-  .tool-hero-header {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    margin-bottom: 24px;
-  }
-  .tool-hero-header img {
-    border-radius: 8px;
-  }
-  .tool-hero-header h2 {
-    font-size: 28px;
-    font-weight: 700;
-    letter-spacing: -0.5px;
-  }
-  .tool-hero-badge {
-    display: inline-block;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--accent);
-    border: 1px solid var(--accent-dim);
-    padding: 3px 10px;
-    border-radius: 999px;
-    white-space: nowrap;
-  }
-  .tool-story {
-    font-size: 15px;
-    color: var(--text-muted);
-    line-height: 1.8;
-  }
-  .tool-story p { margin-bottom: 16px; }
-  .tool-story .punchline {
-    color: var(--text);
-    font-weight: 600;
-    font-size: 16px;
-  }
-
-  /* ── Screenshot ── */
-  .screenshot {
-    margin-bottom: 40px;
-  }
-  .screenshot img {
-    width: 100%;
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-  }
-
-  /* ── Features ── */
-  .features { margin-bottom: 56px; }
-  .feature-item {
-    padding: 24px 0;
-    border-bottom: 1px solid var(--border);
-  }
-  .feature-item:last-child { border-bottom: none; }
-  .feature-item h3 {
-    font-size: 16px;
-    margin-bottom: 8px;
-    color: var(--text);
-  }
-  .feature-item p {
-    font-size: 14px;
-    color: var(--text-muted);
-    line-height: 1.7;
-  }
-  .feature-item .kbd { display: inline-block; }
-
-  /* ── Specs ── */
-  .specs {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 8px 16px;
-    margin-bottom: 56px;
-    padding: 20px;
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-  }
-  .specs li {
-    list-style: none;
-    font-size: 13px;
-    color: var(--text-muted);
-    display: flex;
-    align-items: center;
-    gap: 6px;
-    flex-basis: calc(50% - 8px);
-  }
-  .specs li::before {
-    content: '';
-    display: inline-block;
-    width: 6px;
-    height: 6px;
-    background: var(--accent);
-    border-radius: 50%;
-    flex-shrink: 0;
-  }
-  /* ── Mobile (≤560px) ── */
-  @media (max-width: 560px) {
-    .site-hero h1 { font-size: 28px; }
-    .site-hero { padding: 48px 0 20px; }
-    .tool-hero-header h2 { font-size: 22px; }
-    .specs li { flex-basis: 100%; }
-    .unlock-grid { grid-template-columns: 1fr; }
-    .unlock-or { text-align: center; }
-    .mm-legend { flex-direction: column; gap: 8px; }
-    .guess-input-row { flex-wrap: wrap; }
-    .guess-input-row input { max-width: 100%; }
-    .tools-grid { grid-template-columns: 1fr; }
-  }
-
-  /* ── Sections ── */
-  section { margin-bottom: 56px; }
-  .section-title {
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--text-muted);
-    margin-bottom: 20px;
-    padding-bottom: 8px;
-    border-bottom: 1px solid var(--border);
-  }
-
-  /* ── Unlock Paths ── */
-  .unlock-intro {
-    font-size: 14px;
-    color: var(--text-muted);
-    margin-bottom: 20px;
-  }
-  .unlock-grid {
-    display: grid;
-    grid-template-columns: 1fr auto 1fr;
-    gap: 16px;
-    align-items: center;
-  }
-  .unlock-or {
-    font-size: 13px;
-    text-transform: uppercase;
-    letter-spacing: 1.5px;
-    color: var(--text-muted);
-  }
-  .unlock-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-    transition: transform 0.15s, box-shadow 0.15s;
-  }
-  .unlock-card:hover {
-    transform: translateY(-2px);
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-  }
-  .unlock-card h3 {
-    font-size: 16px;
-    margin-bottom: 8px;
-  }
-  .unlock-card p {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-bottom: 16px;
-  }
-
-  /* ── Buttons ── */
-  .btn {
-    display: inline-block;
-    padding: 10px 20px;
-    border-radius: var(--radius);
-    border: none;
-    font-family: inherit;
-    font-size: 14px;
-    font-weight: 600;
-    cursor: pointer;
-    transition: opacity 0.15s;
-  }
-  .btn:hover { opacity: 0.85; }
-  .btn-primary { background: var(--accent); color: #0e0e10; }
-  .btn-outline {
-    background: transparent;
-    color: var(--accent);
-    border: 1px solid var(--accent-dim);
-  }
-  .btn-green { background: var(--green); color: #0e0e10; }
-  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
-  .btn:focus-visible,
-  .license-toggle:focus-visible {
-    outline: 2px solid var(--accent);
-    outline-offset: 2px;
-  }
-
-  /* ── Mastermind ── */
-  .mastermind-area {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px;
-    margin-top: 16px;
-  }
-
-  .guess-input-row {
-    display: flex;
-    gap: 8px;
-    margin-bottom: 16px;
-    align-items: center;
-  }
-  .guess-input-row input {
-    flex: 1;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    color: var(--text);
-    font-family: inherit;
-    font-size: 20px;
-    letter-spacing: 8px;
-    padding: 10px 16px;
-    border-radius: var(--radius);
-    text-align: center;
-    max-width: 200px;
-  }
-  .guess-input-row input:focus {
-    outline: none;
-    border-color: var(--accent);
-  }
-
-  .guess-history {
-    max-height: 280px;
-    overflow-y: auto;
-  }
-  .guess-row {
-    display: flex;
-    align-items: center;
-    gap: 12px;
-    padding: 6px 0;
-    font-size: 14px;
-    border-bottom: 1px solid var(--border);
-  }
-  .guess-row:last-child { border-bottom: none; }
-  .guess-code {
-    font-size: 18px;
-    letter-spacing: 6px;
-    min-width: 90px;
-  }
-  .guess-result { color: var(--text-muted); }
-  .guess-result .correct { color: var(--green); font-weight: 700; }
-  .guess-result .misplaced { color: var(--yellow); font-weight: 700; }
-
-  .mm-legend {
-    display: flex;
-    gap: 16px;
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-bottom: 16px;
-    padding: 10px 14px;
-    background: var(--bg);
-    border-radius: var(--radius);
-    border: 1px solid var(--border);
-  }
-  .mm-legend span { display: flex; align-items: center; gap: 6px; }
-  .mm-legend .dot-green { color: var(--green); }
-  .mm-legend .dot-yellow { color: var(--yellow); }
-  .guess-num { color: var(--text-muted); min-width: 24px; text-align: right; }
-
-  .mm-error {
-    color: var(--red);
-    font-size: 13px;
-    margin-bottom: 8px;
-    min-height: 20px;
-  }
-
-  .mm-status {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-bottom: 12px;
-  }
-
-  .win-banner {
-    text-align: center;
-    padding: 20px;
-    color: var(--green);
-    font-weight: 700;
-    font-size: 16px;
-  }
-  .win-banner:not(.hidden) {
-    animation: winReveal 0.3s ease-out;
-  }
-  @keyframes winReveal {
-    from { opacity: 0; transform: translateY(8px); }
-    to { opacity: 1; transform: translateY(0); }
-  }
-  .win-banner-tip { margin-top: 12px; }
-  .win-banner-tip .btn { font-size: 13px; }
-
-  /* ── Download ── */
-  .download-section {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 32px 24px;
-    text-align: center;
-    transition: opacity 0.3s ease;
-  }
-  .download-section.locked {
-    opacity: 0.4;
-    pointer-events: none;
-    user-select: none;
-  }
-  .download-section h3 { margin-bottom: 8px; }
-  .download-section p {
-    font-size: 13px;
-    color: var(--text-muted);
-    margin-bottom: 16px;
-  }
-  .lock-overlay {
-    font-size: 14px;
-    color: var(--text-muted);
-    padding: 16px;
-  }
-
-  /* ── License ── */
-  .license-toggle {
-    background: none;
-    border: none;
-    color: var(--accent);
-    cursor: pointer;
-    font-family: inherit;
-    font-size: 13px;
-    margin-top: 16px;
-    padding: 4px 0;
-  }
-  .license-toggle:hover { text-decoration: underline; }
-  .license-text {
-    display: none;
-    text-align: left;
-    background: var(--bg);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
-    margin-top: 12px;
-    font-size: 12px;
-    color: var(--text-muted);
-    line-height: 1.7;
-    max-height: 240px;
-    overflow-y: auto;
-    white-space: pre-wrap;
-  }
-  .license-text.open { display: block; }
-
-  /* ── Coming Soon ── */
-  .tools-grid {
-    display: grid;
-    grid-template-columns: repeat(3, 1fr);
-    gap: 16px;
-  }
-  .tool-card {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 24px 20px;
-    text-align: center;
-  }
-  .tool-card h4 { font-size: 14px; margin-bottom: 6px; }
-  .tool-card p { font-size: 12px; color: var(--text-muted); margin-bottom: 12px; }
-  .tool-card .badge {
-    display: inline-block;
-    font-size: 11px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-    color: var(--yellow);
-    border: 1px solid var(--yellow);
-    padding: 2px 10px;
-    border-radius: 999px;
-    opacity: 0.7;
-  }
-
-  /* ── Guide ── */
-  .guide {
-    margin-bottom: 56px;
-    content-visibility: auto;
-    contain-intrinsic-size: auto 1200px;
-  }
-  .guide h3 {
-    font-size: 16px;
-    color: var(--text);
-    margin: 32px 0 12px;
-  }
-  .guide h3:first-of-type { margin-top: 0; }
-  .guide p {
-    font-size: 14px;
-    color: var(--text-muted);
-    line-height: 1.7;
-    margin-bottom: 12px;
-  }
-  .guide ol, .guide ul {
-    padding-left: 20px;
-    margin-bottom: 16px;
-  }
-  .guide li {
-    font-size: 14px;
-    color: var(--text-muted);
-    line-height: 1.8;
-  }
-  .guide li strong { color: var(--text); }
-  .guide .note {
-    font-size: 13px;
-    color: var(--text-muted);
-    border-left: 2px solid var(--accent-dim);
-    padding: 8px 16px;
-    margin: 16px 0;
-    background: var(--surface);
-    border-radius: 0 var(--radius) var(--radius) 0;
-  }
-  .guide pre {
-    background: var(--surface);
-    border: 1px solid var(--border);
-    border-radius: var(--radius);
-    padding: 16px;
-    margin: 12px 0 16px;
-    font-size: 13px;
-    color: var(--text);
-    overflow-x: auto;
-  }
-  .guide pre code {
-    background: none;
-    border: none;
-    padding: 0;
-    font-size: 13px;
-  }
-  .shortcut-table {
-    width: 100%;
-    border-collapse: collapse;
-    margin: 12px 0 16px;
-    font-size: 13px;
-  }
-  .shortcut-table th,
-  .shortcut-table td {
-    text-align: left;
-    padding: 8px 12px;
-    border-bottom: 1px solid var(--border);
-  }
-  .shortcut-table th {
-    color: var(--text-muted);
-    font-weight: 600;
-    font-size: 12px;
-    text-transform: uppercase;
-    letter-spacing: 1px;
-  }
-  .shortcut-table td:first-child { color: var(--text); white-space: nowrap; }
-  .shortcut-table td:last-child { color: var(--text-muted); }
-
-  /* ── About ── */
-  .story p + p { margin-top: 12px; }
 
   /* ── Skip Link ── */
   .skip-link {
     position: absolute;
     top: -100%;
     left: 16px;
-    background: var(--accent);
-    color: var(--bg);
+    background: var(--amber);
+    color: var(--env-void);
     padding: 8px 16px;
-    border-radius: var(--radius);
+    border-radius: var(--radius-md);
     font-size: 14px;
     font-weight: 600;
     z-index: 100;
@@ -555,442 +79,455 @@
     top: 16px;
   }
 
-  /* ── Footer ── */
-  footer {
-    padding: 32px 0;
-    text-align: center;
-    font-size: 12px;
-    color: var(--text-muted);
-    border-top: 1px solid var(--border);
-    margin-top: 24px;
+  /* ── Grain Overlay ── */
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
   }
-  footer a { color: var(--text-muted); font-size: 12px; text-decoration: none; }
-  footer a:hover { text-decoration: underline; }
-  footer .copyright { margin-top: 8px; }
+
+  /* ── Environment ── */
+  .environment {
+    min-height: 100vh;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+  }
+
+  /* Vignette */
+  .environment::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(
+      ellipse 70% 70% at 50% 50%,
+      transparent 0%,
+      var(--env-void) 100%
+    );
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* Floor haze */
+  .environment::after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    height: 30%;
+    background: linear-gradient(
+      to top,
+      rgba(26, 20, 16, 0.4) 0%,
+      transparent 100%
+    );
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  /* ── Ghost Cabinets ── */
+  .ghost-left,
+  .ghost-right {
+    position: absolute;
+    top: 50%;
+    width: 120px;
+    height: 300px;
+    background: var(--cab-body);
+    border-radius: var(--radius-lg);
+    transform: translateY(-50%);
+    opacity: 0.04;
+    filter: blur(4px);
+    pointer-events: none;
+    z-index: 0;
+  }
+  .ghost-left { left: -40px; }
+  .ghost-right { right: -40px; }
+
+  /* ── Cabinet ── */
+  .cabinet {
+    width: clamp(320px, 50vw, 520px);
+    background: var(--cab-body);
+    border-radius: var(--radius-lg);
+    padding: 24px;
+    position: relative;
+    z-index: 1;
+    transform: perspective(1200px) rotateX(1deg);
+    box-shadow:
+      0 20px 60px rgba(13, 10, 8, 0.8),
+      0 2px 0 var(--cab-highlight) inset,
+      0 -2px 0 rgba(13, 10, 8, 0.5) inset;
+    animation: cabinetReveal 400ms ease-out forwards;
+  }
+
+  @keyframes cabinetReveal {
+    from {
+      opacity: 0;
+      transform: perspective(1200px) rotateX(1deg) translateY(12px);
+    }
+    to {
+      opacity: 1;
+      transform: perspective(1200px) rotateX(1deg) translateY(0);
+    }
+  }
+
+  /* ── Screen ── */
+  .screen {
+    background: var(--screen-bg);
+    border-radius: var(--radius-screen);
+    padding: 64px 48px 48px;
+    position: relative;
+    text-align: center;
+    overflow: hidden;
+    will-change: filter;
+    text-shadow: 0 0 2px rgba(212, 160, 86, 0.3);
+    box-shadow:
+      inset 0 0 40px rgba(13, 10, 8, 0.6),
+      0 0 40px var(--screen-glow),
+      0 0 80px rgba(212, 160, 86, 0.08);
+    animation:
+      screenFlicker 150ms ease 400ms 1,
+      screenBreath 4s ease-in-out 1.6s infinite;
+  }
+
+  /* Scanlines */
+  .screen::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: repeating-linear-gradient(
+      to bottom,
+      transparent 0px,
+      transparent 3px,
+      rgba(0, 0, 0, 0.04) 3px,
+      rgba(0, 0, 0, 0.04) 4px
+    );
+    pointer-events: none;
+    border-radius: inherit;
+    z-index: 10;
+  }
+
+  @keyframes screenFlicker {
+    0%   { opacity: 1; }
+    30%  { opacity: 0.6; }
+    50%  { opacity: 0.9; }
+    70%  { opacity: 0.7; }
+    100% { opacity: 1; }
+  }
+
+  @keyframes screenBreath {
+    0%, 100% { filter: brightness(1); }
+    50%      { filter: brightness(1.015); }
+  }
+
+  /* Screen-wide glow response on hover or focus */
+  .screen:has(.nav-btn:hover),
+  .screen:has(.nav-btn:focus-visible) {
+    box-shadow:
+      inset 0 0 30px rgba(13, 10, 8, 0.4),
+      0 0 50px rgba(212, 160, 86, 0.2),
+      0 0 100px rgba(212, 160, 86, 0.1);
+  }
+
+  /* ── Marquee Title ── */
+  .marquee-title {
+    font-family: var(--font-mono);
+    font-size: clamp(24px, 3.5vw, 40px);
+    font-weight: 400;
+    letter-spacing: 0.08em;
+    color: var(--amber);
+    text-shadow:
+      0 0 4px var(--amber),
+      0 0 12px rgba(212, 160, 86, 0.6),
+      0 0 30px rgba(212, 160, 86, 0.3),
+      0 0 60px rgba(212, 160, 86, 0.1);
+    text-transform: lowercase;
+    line-height: 1.2;
+    position: relative;
+    z-index: 1;
+  }
+
+  .marquee-link {
+    color: inherit;
+    text-decoration: none;
+    text-shadow: inherit;
+  }
+
+  .marquee-link:hover {
+    color: var(--amber-bright);
+    text-shadow:
+      0 0 6px var(--amber-bright),
+      0 0 16px rgba(255, 157, 58, 0.6),
+      0 0 36px rgba(255, 157, 58, 0.3),
+      0 0 70px rgba(255, 157, 58, 0.15);
+  }
+
+  .marquee-link:focus-visible {
+    outline: 2px solid var(--amber-bright);
+    outline-offset: 8px;
+  }
+
+  /* ── Navigation Buttons ── */
+  .nav-buttons {
+    display: flex;
+    gap: clamp(12px, 2vw, 20px);
+    justify-content: center;
+    margin-top: clamp(24px, 4vw, 40px);
+    position: relative;
+    z-index: 1;
+  }
+
+  .nav-btn {
+    font-family: var(--font-mono);
+    font-size: var(--type-nav);
+    font-weight: 700;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--amber);
+    background: transparent;
+    border: 1.5px solid var(--amber-dim);
+    padding: 12px clamp(16px, 3vw, 28px);
+    cursor: pointer;
+    position: relative;
+    text-decoration: none;
+    display: inline-block;
+    transition: all 0.15s ease;
+  }
+
+  .nav-btn:hover {
+    color: var(--amber-bright);
+    border-color: var(--amber);
+    background: rgba(212, 160, 86, 0.06);
+    text-shadow:
+      0 0 8px rgba(255, 157, 58, 0.4),
+      0 0 20px rgba(255, 157, 58, 0.15);
+    text-decoration: none;
+  }
+
+  .nav-btn:focus-visible {
+    outline: 2px solid var(--amber-bright);
+    outline-offset: 4px;
+  }
+
+  .nav-btn:active {
+    background: rgba(212, 160, 86, 0.15);
+    color: var(--amber-bright);
+    transition: none;
+  }
+
+  /* ── Control Panel ── */
+  .controls {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 12px;
+    padding: 20px 0 8px;
+    color: var(--cab-highlight);
+  }
+
+  .control-dot {
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    border: 1.5px solid var(--cab-highlight);
+    background: transparent;
+  }
+
+  .control-dot.pulse {
+    animation: controlPulse 2.5s ease-in-out infinite;
+  }
+
+  @keyframes controlPulse {
+    0%, 100% { opacity: 0.3; }
+    50%      { opacity: 0.8; border-color: var(--amber-dim); }
+  }
+
+  .control-diamond {
+    width: 14px;
+    height: 14px;
+    border: 1.5px solid var(--cab-highlight);
+    transform: rotate(45deg);
+    background: transparent;
+  }
+
+  /* ── Serial Plate ── */
+  .cabinet-serial {
+    font-family: var(--font-mono);
+    font-size: var(--type-detail);
+    color: var(--cab-highlight);
+    letter-spacing: 0.08em;
+    text-align: center;
+    margin-top: 12px;
+    opacity: 0.5;
+  }
+
+  /* ── Reduced Motion ── */
+  @media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    .screen {
+      filter: none;
+      will-change: auto;
+    }
+  }
+
+  /* ── Tablet (768px - 1023px) ── */
+  @media (max-width: 1023px) {
+    .cabinet {
+      width: clamp(320px, 70vw, 520px);
+    }
+    .ghost-left, .ghost-right {
+      display: none;
+    }
+  }
+
+  /* ── Mobile (< 768px) ── */
+  @media (max-width: 767px) {
+    body {
+      overflow: auto;
+      height: auto;
+    }
+
+    .cabinet {
+      width: 100%;
+      border-radius: 0;
+      transform: none;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 16px;
+      box-shadow: none;
+    }
+
+    .screen {
+      border-radius: var(--radius-md);
+      padding: 40px 20px;
+    }
+
+    .marquee-title {
+      letter-spacing: 0.06em;
+      word-break: break-word;
+    }
+
+    .controls {
+      padding: 16px 0 4px;
+    }
+
+    .nav-buttons {
+      flex-direction: column;
+      gap: 12px;
+      align-items: stretch;
+    }
+
+    .nav-btn {
+      text-align: center;
+      padding: 14px 20px;
+    }
+
+    .environment::before {
+      opacity: 0.5;
+    }
+
+    .ghost-left, .ghost-right {
+      display: none;
+    }
+  }
+
+  /* ── Short mobile viewports ── */
+  @media (max-height: 600px) and (max-width: 767px) {
+    .controls, .cabinet-serial { display: none; }
+  }
 </style>
 </head>
 <body>
 
-<a href="#main-content" class="skip-link">Skip to content</a>
-<div class="container" id="main-content">
+<a href="#main" class="skip-link">Skip to content</a>
+<div class="grain" aria-hidden="true"></div>
 
-  <!-- Site Hero -->
-  <div class="site-hero">
-    <h1><span>multi-tool</span></h1>
-    <p>Small, focused tools for developers. Built to solve one thing well, distributed here.</p>
-    <p class="hero-jump-link"><a href="#get-cmd-palette">Jump to download &darr;</a></p>
+<main class="environment" id="main">
+  <div class="ghost-left" aria-hidden="true"></div>
+  <div class="ghost-right" aria-hidden="true"></div>
+
+  <div class="cabinet">
+    <div class="screen">
+      <h1 class="marquee-title"><a href="/about/" class="marquee-link" aria-label="forgonetokens — about">forgonetokens</a></h1>
+
+      <nav class="nav-buttons" aria-label="Site navigation">
+        <a href="https://forgonetokens.substack.com" class="nav-btn" target="_blank" rel="noopener" aria-label="Read — opens Substack">READ</a>
+        <a href="/tools/" class="nav-btn">BUILD</a>
+        <a href="https://mastodon.social/@forgonetokens" class="nav-btn" target="_blank" rel="noopener me" aria-label="Connect — opens Mastodon">CONNECT</a>
+      </nav>
+    </div>
+
+    <div class="controls" aria-hidden="true">
+      <span class="control-dot"></span>
+      <span class="control-dot pulse"></span>
+      <span class="control-diamond"></span>
+      <span class="control-dot"></span>
+      <span class="control-dot"></span>
+    </div>
+
+    <div class="cabinet-serial" aria-hidden="true">FT-001 &middot; NO COIN NEEDED</div>
   </div>
-
-  <hr class="site-divider">
-
-  <!-- CMD Palette -->
-  <div class="tool-hero">
-    <div class="tool-hero-header">
-      <img src="icon.png" alt="CMD Palette icon" width="40" height="40" decoding="async" />
-      <h2>CMD PALETTE</h2>
-      <span class="tool-hero-badge">macOS menu bar app</span>
-    </div>
-    <div class="tool-story">
-      <p>I kept copy-pasting the same terminal commands. Git incantations, dev server starts, that one process kill command I google every single time. So I built a menu bar app that just... has them.</p>
-      <p>Then I added my projects. Now I click a folder and I'm running a dev server with localhost open. No cd-ing around. No remembering port numbers.</p>
-      <p class="punchline">This is that app.</p>
-    </div>
-  </div>
-
-  <div class="screenshot">
-    <img src="screenshots/cmd-palette.png" alt="CMD Palette showing project list and terminal" width="720" height="450" loading="lazy" decoding="async" />
-  </div>
-
-  <div class="features">
-    <div class="section-title">What it does</div>
-
-    <div class="feature-item">
-      <h3>Your projects, one click away.</h3>
-      <p>Point CMD Palette at your repos folder and every project appears instantly. Open a terminal, launch the dev server, or jump to localhost — all from your menu bar.</p>
-    </div>
-
-    <div class="feature-item">
-      <h3>Every command you keep forgetting.</h3>
-      <p>Git commands, process management, dev server shortcuts — searchable and organized. Click to copy. Stop googling "git undo last commit" for the hundredth time.</p>
-    </div>
-
-    <div class="feature-item">
-      <h3>Keyboard-first.</h3>
-      <p><span class="kbd">Cmd+Shift+&lt;</span> opens the palette from anywhere. Arrow keys navigate, left/right picks an action, Enter executes. Mouse optional.</p>
-    </div>
-
-    <div class="feature-item">
-      <h3>One-click dev environments.</h3>
-      <p>Drop a <span class="kbd">.cmdpalette.json</span> in any project to define your dev command and localhost URL. Hit "Dev" — server starts, browser opens, you're coding.</p>
-    </div>
-
-    <div class="feature-item">
-      <h3>Lightweight and native.</h3>
-      <p>Built with Tauri. Lives in your menu bar. ~20MB memory. No Electron bloat, no browser tabs, no subscriptions.</p>
-    </div>
-  </div>
-
-  <!-- Specs -->
-  <ul class="specs">
-    <li>Menu bar app for macOS</li>
-    <li>Global hotkey access</li>
-    <li>Project launcher with dev server detection</li>
-    <li>Auto-opens localhost in browser</li>
-    <li>Searchable command reference</li>
-    <li>Keyboard navigable</li>
-    <li>Per-project .cmdpalette.json config</li>
-    <li>Built with Tauri + Svelte</li>
-  </ul>
-
-  <!-- Unlock Paths -->
-  <section id="get-cmd-palette">
-    <div class="section-title">Get cmd-palette</div>
-    <p class="unlock-intro">No sign-up, no paywall. Just a little challenge — or a little generosity.</p>
-    <div class="unlock-grid">
-      <div class="unlock-card">
-        <h3>Crack the code</h3>
-        <p>Play a round of Mastermind. Guess the 4-digit code and the download unlocks. Takes a few minutes if you're sharp.</p>
-        <button class="btn btn-primary" id="start-puzzle-btn">Start Puzzle</button>
-      </div>
-      <div class="unlock-or">or</div>
-      <div class="unlock-card">
-        <h3>Leave a tip</h3>
-        <p>Skip the puzzle — drop $3 and download right away. That's it. No subscription, no account.</p>
-        <!-- TODO: Stripe URL duplicated in win-banner below — extract to a shared variable if it changes -->
-        <a class="btn btn-outline" href="https://buy.stripe.com/7sYdR90w58cb75l72r3Nm00" target="_blank" rel="noopener">Tip $3</a>
-      </div>
-    </div>
-
-    <!-- Mastermind Game -->
-    <div class="mastermind-area hidden" id="mastermind">
-      <div class="mm-status" id="mm-status" aria-live="polite">Guess a 4-digit code (digits 0-9, each digit unique). You have unlimited attempts.</div>
-      <div class="mm-legend" id="mm-legend">
-        <span><span class="dot-green" aria-hidden="true">&#9679;</span> Exact = right digit, right place</span>
-        <span><span class="dot-yellow" aria-hidden="true">&#9679;</span> Misplaced = right digit, wrong place</span>
-      </div>
-      <div class="guess-input-row">
-        <input type="text" id="guess-input" maxlength="4" placeholder="1234" autocomplete="off" aria-label="Enter your 4-digit guess" aria-describedby="mm-status mm-legend" inputmode="numeric" pattern="\d{4}" />
-        <button class="btn btn-primary" id="guess-btn">Guess</button>
-      </div>
-      <div class="mm-error" id="mm-error" role="alert"></div>
-      <div class="guess-history" id="guess-history"></div>
-      <div class="win-banner hidden" id="win-banner">
-        You cracked it! Download unlocked below.
-        <div class="win-banner-tip">
-          <a class="btn btn-outline" href="https://buy.stripe.com/7sYdR90w58cb75l72r3Nm00" target="_blank" rel="noopener">Tip $3 anyway</a>
-        </div>
-      </div>
-    </div>
-  </section>
-
-  <!-- Download -->
-  <section>
-    <div class="section-title">Download</div>
-    <div class="download-section locked" id="download-section">
-      <div class="lock-overlay" id="lock-overlay">Crack the code above or leave a $3 tip to unlock this download.</div>
-      <h3 id="dl-heading" class="hidden">cmd-palette</h3>
-      <p id="dl-desc" class="hidden">macOS · Universal binary · Requires macOS 13+</p>
-      <a class="btn btn-green hidden" id="dl-btn" href="CMD%20Palette_0.1.0_aarch64.dmg" download>Download CMD Palette (.dmg)</a>
-      <button class="license-toggle hidden" id="license-btn" aria-expanded="false" aria-controls="license-text">View License</button>
-      <div class="license-text" id="license-text">MIT License
-
-Copyright (c) 2025
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction, including without limitation the rights
-to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
-copies of the Software, and to permit persons to whom the Software is
-furnished to do so, subject to the following conditions:
-
-The above copyright notice and this permission notice shall be included in all
-copies or substantial portions of the Software.
-
-THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
-IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
-FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
-AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
-LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
-OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
-SOFTWARE.</div>
-    </div>
-  </section>
-
-  <!-- Getting Started -->
-  <section class="guide">
-    <div class="section-title">Getting Started</div>
-
-    <h3>Install</h3>
-    <ol>
-      <li>Open the DMG file</li>
-      <li>Drag CMD Palette to your Applications folder</li>
-      <li>Launch it from Applications — you'll see a small icon appear in your menu bar</li>
-      <li>Launch it — macOS may show a security prompt (see note below)</li>
-    </ol>
-    <div class="note"><strong>First launch:</strong> macOS will block CMD Palette because it's unsigned. Go to <strong>System Settings &gt; Privacy &amp; Security</strong>, scroll down, and click <strong>Open Anyway</strong>. This only happens once.</div>
-
-    <h3>Set Up Your Projects</h3>
-    <ol>
-      <li>Click the CMD Palette icon in your menu bar to open the palette</li>
-      <li>You'll see a <strong>Set Projects Folder</strong> button at the top — click it</li>
-      <li>A folder picker will open — navigate to the folder where you keep your coding projects (e.g. <code>~/repos</code>)</li>
-      <li>CMD Palette will scan that folder and list every subdirectory as a project</li>
-    </ol>
-    <div class="note">This setting is saved and persists across restarts. You can change it anytime by clicking the gear icon on the Projects header.</div>
-
-    <h3>Launch a Project</h3>
-    <p>Each project in the list has up to three actions:</p>
-    <ul>
-      <li><strong>Terminal</strong> — Opens a new Terminal.app window at the project directory</li>
-      <li><strong>Dev</strong> — Starts the dev server (detected automatically, or configured via <code>.cmdpalette.json</code>)</li>
-      <li><strong>Browser</strong> — Opens the project's localhost URL in your default browser</li>
-    </ul>
-
-    <p>Click any action directly, or use keyboard navigation:</p>
-    <ol>
-      <li>Press <code>Cmd+Shift+&lt;</code> to open the palette from anywhere</li>
-      <li><code>Arrow Down/Up</code> to highlight a project</li>
-      <li><code>Arrow Left/Right</code> to switch between Terminal, Dev, and Browser</li>
-      <li>Press <code>Enter</code> to execute</li>
-    </ol>
-
-    <p>If a project has a <code>.cmdpalette.json</code> file in its root, CMD Palette will use it for the dev command and URL:</p>
-    <pre><code>{
-  "dev": "npm run dev",
-  "url": "http://localhost:3000"
-}</code></pre>
-    <p>Without a config file, CMD Palette auto-detects the dev command from your project files (<code>package.json</code>, <code>Cargo.toml</code>, etc.). Static HTML projects with an <code>index.html</code> get a one-click browser open.</p>
-
-    <h3>Copy Commands</h3>
-    <p>CMD Palette includes a searchable library of common dev commands (git, npm, process management, etc.).</p>
-    <ol>
-      <li>Click a category to expand it, or just start typing in the search bar to filter</li>
-      <li>Click any command to copy it to your clipboard</li>
-      <li>Paste it into your terminal</li>
-    </ol>
-    <p>A green checkmark confirms the copy. Search works across command names, descriptions, and the actual command text.</p>
-
-    <h3>Keyboard Shortcuts</h3>
-    <table class="shortcut-table">
-      <thead>
-        <tr><th>Key</th><th>Action</th></tr>
-      </thead>
-      <tbody>
-        <tr><td><code>Cmd+Shift+&lt;</code></td><td>Open/close palette from anywhere</td></tr>
-        <tr><td><code>Arrow Down/Up</code></td><td>Navigate items</td></tr>
-        <tr><td><code>Arrow Left/Right</code></td><td>Switch project action (Terminal / Dev / Browser)</td></tr>
-        <tr><td><code>Enter</code></td><td>Execute selected item</td></tr>
-        <tr><td><code>Escape</code></td><td>Clear search</td></tr>
-        <tr><td><code>Type anything</code></td><td>Filter commands and projects</td></tr>
-      </tbody>
-    </table>
-  </section>
-
-  <!-- Coming Soon -->
-  <section>
-    <div class="section-title">More tools</div>
-    <div class="tools-grid">
-      <div class="tool-card">
-        <h4>Env Sync</h4>
-        <p>Manage .env files across projects without the mess.</p>
-        <span class="badge">Coming Soon</span>
-      </div>
-      <div class="tool-card">
-        <h4>Port Scout</h4>
-        <p>See what's running on every port. Kill with one click.</p>
-        <span class="badge">Coming Soon</span>
-      </div>
-      <div class="tool-card">
-        <h4>Snip Shelf</h4>
-        <p>Drag-and-drop code snippet manager for your menu bar.</p>
-        <span class="badge">Coming Soon</span>
-      </div>
-    </div>
-  </section>
-
-  <!-- About -->
-  <section>
-    <div class="section-title">About</div>
-    <div class="story">
-      <p>I'm a self-described "vibe engineer" — one step beyond vibe coder. The projects I build have real, layered complexity, but I still write zero code by hand. I copy-paste from the internet, wire things together with AI, and ship tools that actually work.</p>
-      <p>If that sounds like you, no judgment. I'm living proof you can build genuinely useful software without formal coding experience. Having a tool that keeps your commands organized and your projects one click away makes all the difference. That's why I built this.</p>
-    </div>
-  </section>
-
-</div>
-
-<footer>
-  <div class="container">
-    <a href="#main-content">Back to top &uarr;</a>
-    <div class="copyright">&copy; 2026 devlines</div>
-  </div>
-</footer>
+</main>
 
 <script>
-  // ── Mastermind Game ──
-  // A code-guessing puzzle (like Mastermind) that gates the download.
-  // Player guesses a 4-digit code with unique digits (0-9).
-  // Feedback: "exact" = correct digit in correct position,
-  //           "misplaced" = correct digit in wrong position.
+  // ── Typing Effect (Progressive Enhancement) ──
+  // The title is already in the DOM as full text for no-JS and AT.
+  // This effect visually types it in character by character.
 
-  // ── Helpers ──
+  (function() {
+    var el = document.querySelector('.marquee-link') || document.querySelector('.marquee-title');
+    if (!el) return;
 
-  const CODE_LENGTH = 4;
+    var fullText = el.textContent;
+    var i = 0;
+    var typing = true;
+    var timer;
 
-  /**
-   * Generate a random code of CODE_LENGTH unique digits.
-   * Uses Fisher-Yates shuffle on digits 0-9, then takes the first CODE_LENGTH.
-   */
-  function generateCode() {
-    const digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
-    for (let i = digits.length - 1; i > 0; i--) {
-      const j = Math.floor(Math.random() * (i + 1));
-      [digits[i], digits[j]] = [digits[j], digits[i]];
-    }
-    return digits.slice(0, CODE_LENGTH).map(String);
-  }
+    // aria-label preserves the full text for AT regardless of visual state
+    el.textContent = '';
 
-  // ── Game State ──
-
-  let secretCode = generateCode();
-  let guesses = [];
-  let solved = false;
-  let unlocked = false;
-
-  // ── Cached DOM References ──
-  // All getElementById calls live here — no lookups scattered in functions.
-
-  const puzzleArea = document.getElementById('mastermind');
-  const puzzleToggleBtn = document.getElementById('start-puzzle-btn');
-  const guessInput = document.getElementById('guess-input');
-  const guessBtn = document.getElementById('guess-btn');
-  const guessErrorEl = document.getElementById('mm-error');
-  const guessStatusEl = document.getElementById('mm-status');
-  const guessHistoryEl = document.getElementById('guess-history');
-  const winBanner = document.getElementById('win-banner');
-  const downloadSection = document.getElementById('download-section');
-  const lockOverlay = document.getElementById('lock-overlay');
-  const dlHeading = document.getElementById('dl-heading');
-  const dlDesc = document.getElementById('dl-desc');
-  const dlBtn = document.getElementById('dl-btn');
-  const licenseTextEl = document.getElementById('license-text');
-  const licenseBtnEl = document.getElementById('license-btn');
-
-  // ── Puzzle Visibility ──
-
-  function togglePuzzle() {
-    const isHidden = puzzleArea.classList.contains('hidden');
-    puzzleArea.classList.toggle('hidden');
-    puzzleToggleBtn.textContent = isHidden ? 'Hide Puzzle' : 'Start Puzzle';
-    if (isHidden) guessInput.focus();
-  }
-
-  // ── Guess Submission ──
-
-  function submitGuess() {
-    if (solved) return;
-
-    const raw = guessInput.value.trim();
-    guessErrorEl.textContent = '';
-
-    // Validate: must be exactly CODE_LENGTH digits
-    if (!/^\d{4}$/.test(raw)) {
-      guessErrorEl.textContent = 'Enter exactly 4 digits.';
-      return;
-    }
-
-    // Validate: no repeated digits
-    const digits = raw.split('');
-    if (new Set(digits).size !== CODE_LENGTH) {
-      guessErrorEl.textContent = 'Digits must not repeat.';
-      return;
-    }
-
-    // Score the guess against the secret code
-    let exactCount = 0;
-    let misplacedCount = 0;
-    for (let i = 0; i < CODE_LENGTH; i++) {
-      if (digits[i] === secretCode[i]) {
-        exactCount++;
-      } else if (secretCode.includes(digits[i])) {
-        misplacedCount++;
+    function tick() {
+      if (!typing) return;
+      if (i < fullText.length) {
+        el.textContent += fullText[i++];
+        timer = setTimeout(tick, 60);
+      } else {
+        typing = false;
+        cleanup();
       }
     }
 
-    guesses.push({ code: raw, exactCount, misplacedCount });
-    renderGuesses();
-    guessInput.value = '';
-    guessInput.focus();
-
-    // Update status with attempt count
-    guessStatusEl.textContent = 'Attempt #' + guesses.length + ' — keep going!';
-
-    // Check for win — all digits in correct position
-    if (exactCount === CODE_LENGTH) {
-      solved = true;
-      guessBtn.disabled = true;
-      guessInput.disabled = true;
-      guessStatusEl.textContent = 'Cracked in ' + guesses.length + (guesses.length === 1 ? ' attempt!' : ' attempts!');
-      winBanner.classList.remove('hidden');
-      unlockDownload();
-      // Scroll download section into view after a brief pause
-      setTimeout(function() {
-        downloadSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }, 400);
+    function cancelTyping() {
+      if (!typing) return;
+      typing = false;
+      clearTimeout(timer);
+      el.textContent = fullText;
+      cleanup();
     }
-  }
 
-  // ── Guess History Rendering ──
+    function cleanup() {
+      document.removeEventListener('keydown', cancelTyping);
+      document.removeEventListener('click', cancelTyping);
+    }
 
-  function renderGuesses() {
-    const guess = guesses[guesses.length - 1];
-    guessHistoryEl.insertAdjacentHTML('afterbegin',
-      `<div class="guess-row">
-        <span class="guess-num">${guesses.length}</span>
-        <span class="guess-code">${guess.code}</span>
-        <span class="guess-result"><span class="correct">&#9679; ${guess.exactCount} exact</span> · <span class="misplaced">&#9679; ${guess.misplacedCount} misplaced</span></span>
-      </div>`);
-  }
+    // Cancel typing on first user interaction
+    document.addEventListener('keydown', cancelTyping, { once: false });
+    document.addEventListener('click', cancelTyping, { once: false });
 
-  // ── Download Unlock ──
-  // Removes the locked state from the download section, revealing download controls.
-  // Guarded against double-calls (puzzle win + ?paid query param can both trigger this).
-
-  function unlockDownload() {
-    if (unlocked) return;
-    unlocked = true;
-
-    downloadSection.classList.remove('locked');
-    lockOverlay.classList.add('hidden');
-    dlHeading.classList.remove('hidden');
-    dlDesc.classList.remove('hidden');
-    dlBtn.classList.remove('hidden');
-    licenseBtnEl.classList.remove('hidden');
-  }
-
-  // ── License Toggle ──
-
-  function toggleLicense() {
-    const isOpen = licenseTextEl.classList.toggle('open');
-    licenseBtnEl.setAttribute('aria-expanded', isOpen);
-  }
-
-  // ── Event Listeners ──
-  // All event binding is centralized here for consistency (no inline onclick).
-
-  puzzleToggleBtn.addEventListener('click', togglePuzzle);
-  guessBtn.addEventListener('click', submitGuess);
-  guessInput.addEventListener('keydown', function(e) {
-    if (e.key === 'Enter') submitGuess();
-  });
-  licenseBtnEl.addEventListener('click', toggleLicense);
-
-  // ── Init ──
-  // If user arrived via payment redirect (?paid), unlock download immediately.
-
-  if (new URLSearchParams(window.location.search).has('paid')) {
-    unlockDownload();
-  }
+    // Start typing after cabinet fade + screen flicker
+    setTimeout(tick, 600);
+  })();
 </script>
 
 </body>

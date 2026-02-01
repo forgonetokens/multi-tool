@@ -1,0 +1,1129 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0d0a08">
+<meta name="description" content="CMD Palette — a lightweight macOS menu bar app that launches dev projects, copies terminal commands, and starts dev servers with one click. Built with Tauri.">
+<meta http-equiv="Content-Security-Policy"
+  content="default-src 'self'; style-src 'self' 'unsafe-inline'; script-src 'self' 'unsafe-inline'; img-src 'self'; connect-src 'self' https://buy.stripe.com">
+<title>CMD Palette — forgonetokens tools</title>
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+  html { scroll-behavior: smooth; }
+  @media (prefers-reduced-motion: reduce) {
+    html { scroll-behavior: auto; }
+    *, *::before, *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+    }
+    .win-banner:not(.hidden) { animation: none; }
+    .unlock-card { transition: none; }
+    .download-section { transition: none; }
+  }
+
+  :root {
+    color-scheme: dark;
+
+    /* ── Environment ── */
+    --env-void:       #0d0a08;
+    --env-dark:       #1a1410;
+
+    /* ── Cabinet ── */
+    --cab-body:       #2a2118;
+    --cab-accent:     #3d3228;
+    --cab-highlight:  #5c4a3a;
+
+    /* ── Amber ── */
+    --amber:          #d4a056;
+    --amber-bright:   #ff9d3a;
+    --amber-dim:      #8a6830;
+
+    /* ── Text ── */
+    --text-primary:   #e8dcc8;
+    --text-secondary: #a89880;
+
+    /* ── Screen ── */
+    --screen-bg:      #1a1612;
+    --screen-glow:    rgba(212, 160, 86, 0.15);
+
+    /* ── Semantic ── */
+    --alert:          #d0623f;
+    --success:        #7ab56a;
+
+    /* ── Radii ── */
+    --radius-sm:      4px;
+    --radius-md:      8px;
+    --radius-lg:      16px;
+
+    /* ── Typography ── */
+    --font-mono: 'JetBrains Mono', 'SF Mono', 'Cascadia Code', 'Fira Code', monospace;
+    --font-body: Charter, 'Bitstream Charter', 'Sitka Text', Georgia, serif;
+  }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--env-void);
+    color: var(--text-primary);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+    position: relative;
+  }
+
+  /* ── Ambient glow from cabinet above ── */
+  body::before {
+    content: '';
+    position: fixed;
+    top: -200px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 600px;
+    height: 400px;
+    background: radial-gradient(ellipse, rgba(212, 160, 86, 0.06) 0%, transparent 70%);
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  /* ── Grain Overlay ── */
+  .grain {
+    position: fixed;
+    inset: 0;
+    z-index: 9999;
+    pointer-events: none;
+    opacity: 0.05;
+    mix-blend-mode: overlay;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)'/%3E%3C/svg%3E");
+  }
+
+  a { color: var(--amber); text-decoration: none; }
+  a:hover { text-decoration: underline; }
+
+  .container { max-width: 720px; margin: 0 auto; padding: 0 24px; }
+  .hidden { display: none; }
+
+  /* ── Skip Link ── */
+  .skip-link {
+    position: absolute;
+    top: -100%;
+    left: 16px;
+    background: var(--amber);
+    color: var(--env-void);
+    padding: 8px 16px;
+    border-radius: var(--radius-md);
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    z-index: 100;
+    text-decoration: none;
+  }
+  .skip-link:focus { top: 16px; }
+
+  /* ── Sticky Header ── */
+  .tools-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: rgba(13, 10, 8, 0.95);
+    backdrop-filter: blur(8px);
+    -webkit-backdrop-filter: blur(8px);
+    border-bottom: 1px solid var(--cab-accent);
+    padding: 12px 0;
+  }
+  .tools-header .container {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .back-link {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--amber);
+    text-decoration: none;
+    letter-spacing: 0.02em;
+  }
+  .back-link:hover { text-decoration: underline; }
+  .header-label {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--cab-highlight);
+  }
+
+  /* ── Section Dividers ── */
+  .section-divider {
+    border: none;
+    height: 1px;
+    background: linear-gradient(to right, transparent, var(--cab-accent), transparent);
+    margin: 48px 0;
+  }
+
+  /* ── Utilities ── */
+  code, .kbd {
+    font-family: var(--font-mono);
+    background: var(--cab-body);
+    border: 1px solid var(--cab-accent);
+    border-radius: var(--radius-sm);
+    padding: 1px 6px;
+    font-size: 12px;
+    color: var(--text-primary);
+  }
+
+  /* ── Tool Hero ── */
+  .tool-hero {
+    padding-top: 48px;
+    margin-bottom: 40px;
+  }
+  .tool-hero-header {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin-bottom: 24px;
+  }
+  .tool-hero-header img {
+    border-radius: var(--radius-md);
+  }
+  .tool-hero-header h2 {
+    font-family: var(--font-mono);
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: -0.5px;
+    color: var(--text-primary);
+  }
+  .tool-hero-badge {
+    font-family: var(--font-mono);
+    display: inline-block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--amber);
+    border: 1px solid var(--amber-dim);
+    padding: 3px 10px;
+    border-radius: 999px;
+    white-space: nowrap;
+  }
+  .tool-story {
+    font-size: 15px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+  }
+  .tool-story p { margin-bottom: 16px; }
+  .tool-story .punchline {
+    color: var(--text-primary);
+    font-weight: 600;
+    font-size: 16px;
+  }
+
+  /* ── Screenshot ── */
+  .screenshot { margin-bottom: 40px; }
+  .screenshot img {
+    width: 100%;
+    border-radius: var(--radius-md);
+    border: 1px solid var(--cab-accent);
+  }
+
+  /* ── Features ── */
+  .features { margin-bottom: 56px; }
+  .feature-item {
+    padding: 24px 0;
+    border-bottom: 1px solid var(--cab-accent);
+  }
+  .feature-item:last-child { border-bottom: none; }
+  .feature-item h3 {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+  }
+  .feature-item p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+  }
+
+  /* ── Section Titles ── */
+  .section-title {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--cab-accent);
+  }
+
+  /* ── Specs ── */
+  .specs {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px 16px;
+    margin-bottom: 56px;
+    padding: 24px;
+    background: var(--screen-bg);
+    border: 1px solid var(--cab-accent);
+    border-radius: var(--radius-md);
+  }
+  .specs li {
+    list-style: none;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-secondary);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    flex-basis: calc(50% - 8px);
+  }
+  .specs li::before {
+    content: '';
+    display: inline-block;
+    width: 6px;
+    height: 6px;
+    background: var(--amber);
+    border-radius: 50%;
+    flex-shrink: 0;
+  }
+
+  /* ── Sections ── */
+  section { margin-bottom: 56px; }
+
+  /* ── Unlock Paths ── */
+  .unlock-intro {
+    font-size: 14px;
+    color: var(--text-secondary);
+    margin-bottom: 20px;
+  }
+  .unlock-grid {
+    display: grid;
+    grid-template-columns: 1fr auto 1fr;
+    gap: 16px;
+    align-items: center;
+  }
+  .unlock-or {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    text-transform: uppercase;
+    letter-spacing: 1.5px;
+    color: var(--text-secondary);
+  }
+  .unlock-card {
+    background: var(--screen-bg);
+    border: 1px solid var(--cab-accent);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .unlock-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(13, 10, 8, 0.5);
+    border-color: var(--amber-dim);
+  }
+  .unlock-card h3 {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    margin-bottom: 8px;
+    color: var(--text-primary);
+  }
+  .unlock-card p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+  }
+
+  /* ── Buttons ── */
+  .btn {
+    display: inline-block;
+    padding: 10px 20px;
+    border-radius: var(--radius-md);
+    border: none;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    font-weight: 600;
+    cursor: pointer;
+    transition: opacity 0.15s;
+    text-decoration: none;
+  }
+  .btn:hover { opacity: 0.85; text-decoration: none; }
+  .btn-primary { background: var(--amber); color: var(--env-void); }
+  .btn-outline {
+    background: transparent;
+    color: var(--amber);
+    border: 1px solid var(--amber-dim);
+  }
+  .btn-green { background: var(--success); color: var(--env-void); }
+  .btn:disabled { opacity: 0.4; cursor: not-allowed; }
+  .btn:focus-visible,
+  .license-toggle:focus-visible {
+    outline: 2px solid var(--amber-bright);
+    outline-offset: 2px;
+  }
+
+  /* ── Mastermind ── */
+  .mastermind-area {
+    background: var(--screen-bg);
+    border: 1px solid var(--cab-accent);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    margin-top: 16px;
+  }
+  .guess-input-row {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 16px;
+    align-items: center;
+  }
+  .guess-input-row input {
+    flex: 1;
+    background: var(--env-void);
+    border: 1px solid var(--cab-accent);
+    color: var(--text-primary);
+    font-family: var(--font-mono);
+    font-size: 20px;
+    letter-spacing: 8px;
+    padding: 10px 16px;
+    border-radius: var(--radius-md);
+    text-align: center;
+    max-width: 200px;
+  }
+  .guess-input-row input:focus {
+    outline: none;
+    border-color: var(--amber);
+  }
+  .guess-input-row input:focus-visible {
+    outline: 2px solid var(--amber-bright);
+    outline-offset: 2px;
+  }
+  .guess-history {
+    max-height: 280px;
+    overflow-y: auto;
+  }
+  .guess-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    padding: 6px 0;
+    font-family: var(--font-mono);
+    font-size: 14px;
+    border-bottom: 1px solid var(--cab-accent);
+  }
+  .guess-row:last-child { border-bottom: none; }
+  .guess-code {
+    font-size: 18px;
+    letter-spacing: 6px;
+    min-width: 90px;
+  }
+  .guess-result { color: var(--text-secondary); }
+  .guess-result .correct { color: var(--success); font-weight: 700; }
+  .guess-result .misplaced { color: var(--amber-bright); font-weight: 700; }
+  .mm-legend {
+    display: flex;
+    gap: 16px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+    padding: 10px 16px;
+    background: var(--env-void);
+    border-radius: var(--radius-md);
+    border: 1px solid var(--cab-accent);
+  }
+  .mm-legend span { display: flex; align-items: center; gap: 6px; }
+  .mm-legend .dot-green { color: var(--success); }
+  .mm-legend .dot-yellow { color: var(--amber-bright); }
+  .guess-num {
+    font-family: var(--font-mono);
+    color: var(--text-secondary);
+    min-width: 24px;
+    text-align: right;
+  }
+  .mm-error {
+    color: var(--alert);
+    font-family: var(--font-mono);
+    font-size: 13px;
+    margin-bottom: 8px;
+    min-height: 20px;
+  }
+  .mm-status {
+    font-family: var(--font-mono);
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 12px;
+  }
+  .win-banner {
+    font-family: var(--font-mono);
+    text-align: center;
+    padding: 20px;
+    color: var(--success);
+    font-weight: 700;
+    font-size: 16px;
+  }
+  .win-banner:not(.hidden) {
+    animation: winReveal 0.3s ease-out;
+  }
+  @keyframes winReveal {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .win-banner-tip { margin-top: 12px; }
+  .win-banner-tip .btn { font-size: 13px; }
+
+  /* ── Download ── */
+  .download-section {
+    background: var(--screen-bg);
+    border: 1px solid var(--cab-accent);
+    border-radius: var(--radius-md);
+    padding: 32px 24px;
+    text-align: center;
+    transition: opacity 0.3s ease;
+  }
+  .download-section.locked {
+    opacity: 0.4;
+    pointer-events: none;
+    user-select: none;
+  }
+  .download-section h3 {
+    font-family: var(--font-mono);
+    margin-bottom: 8px;
+    color: var(--text-primary);
+  }
+  .download-section p {
+    font-size: 13px;
+    color: var(--text-secondary);
+    margin-bottom: 16px;
+  }
+  .lock-overlay {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    color: var(--text-secondary);
+    padding: 16px;
+  }
+
+  /* ── License ── */
+  .license-toggle {
+    background: none;
+    border: none;
+    color: var(--amber);
+    cursor: pointer;
+    font-family: var(--font-mono);
+    font-size: 13px;
+    margin-top: 16px;
+    padding: 4px 0;
+  }
+  .license-toggle:hover { text-decoration: underline; }
+  .license-text {
+    display: none;
+    text-align: left;
+    background: var(--env-void);
+    border: 1px solid var(--cab-accent);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin-top: 12px;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    max-height: 240px;
+    overflow-y: auto;
+    white-space: pre-wrap;
+  }
+  .license-text.open { display: block; }
+
+  /* ── Coming Soon ── */
+  .tools-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 16px;
+  }
+  .tool-card {
+    background: var(--screen-bg);
+    border: 1px dashed var(--cab-accent);
+    border-radius: var(--radius-md);
+    padding: 24px;
+    text-align: center;
+    opacity: 0.6;
+  }
+  .tool-card h4 {
+    font-family: var(--font-mono);
+    font-size: 14px;
+    margin-bottom: 6px;
+    color: var(--text-primary);
+  }
+  .tool-card p { font-size: 12px; color: var(--text-secondary); margin-bottom: 12px; }
+  .tool-card .badge {
+    font-family: var(--font-mono);
+    display: inline-block;
+    font-size: 11px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+    color: var(--amber-bright);
+    border: 1px solid var(--amber-bright);
+    padding: 2px 10px;
+    border-radius: 999px;
+    opacity: 0.7;
+  }
+
+  /* ── Guide ── */
+  .guide {
+    margin-bottom: 56px;
+    content-visibility: auto;
+    contain-intrinsic-size: auto 1200px;
+  }
+  .guide h3 {
+    font-family: var(--font-mono);
+    font-size: 16px;
+    color: var(--text-primary);
+    margin: 32px 0 12px;
+  }
+  .guide h3:first-of-type { margin-top: 0; }
+  .guide p {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.7;
+    margin-bottom: 12px;
+  }
+  .guide ol, .guide ul {
+    padding-left: 20px;
+    margin-bottom: 16px;
+  }
+  .guide li {
+    font-size: 14px;
+    color: var(--text-secondary);
+    line-height: 1.8;
+  }
+  .guide li strong { color: var(--text-primary); }
+  .guide .note {
+    font-size: 13px;
+    color: var(--text-secondary);
+    border-left: 2px solid var(--amber-dim);
+    padding: 8px 16px;
+    margin: 16px 0;
+    background: var(--screen-bg);
+    border-radius: 0 var(--radius-md) var(--radius-md) 0;
+  }
+  .guide pre {
+    background: var(--screen-bg);
+    border: 1px solid var(--cab-accent);
+    border-radius: var(--radius-md);
+    padding: 16px;
+    margin: 12px 0 16px;
+    font-size: 13px;
+    color: var(--text-primary);
+    overflow-x: auto;
+  }
+  .guide pre code {
+    background: none;
+    border: none;
+    padding: 0;
+    font-size: 13px;
+  }
+  .shortcut-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 12px 0 16px;
+    font-family: var(--font-mono);
+    font-size: 13px;
+  }
+  .shortcut-table th,
+  .shortcut-table td {
+    text-align: left;
+    padding: 8px 12px;
+    border-bottom: 1px solid var(--cab-accent);
+  }
+  .shortcut-table th {
+    color: var(--text-secondary);
+    font-weight: 600;
+    font-size: 12px;
+    text-transform: uppercase;
+    letter-spacing: 1px;
+  }
+  .shortcut-table td:first-child { color: var(--text-primary); white-space: nowrap; }
+  .shortcut-table td:last-child { color: var(--text-secondary); }
+
+  /* ── Footer ── */
+  footer {
+    padding: 48px 0;
+    text-align: center;
+    font-family: var(--font-mono);
+    font-size: 12px;
+    color: var(--text-secondary);
+    border-top: 1px solid var(--cab-accent);
+    margin-top: 24px;
+  }
+  footer a { color: var(--amber); font-size: 12px; text-decoration: none; }
+  footer a:hover { text-decoration: underline; }
+  footer .copyright { margin-top: 8px; }
+
+  /* ── Mobile (< 768px) ── */
+  @media (max-width: 767px) {
+    .container { padding: 0 16px; }
+    .tool-hero { padding-top: 32px; }
+    .tool-hero-header h2 { font-size: 22px; }
+    .specs li { flex-basis: 100%; }
+    .unlock-grid { grid-template-columns: 1fr; }
+    .unlock-or { text-align: center; }
+    .mm-legend { flex-direction: column; gap: 8px; }
+    .guess-input-row { flex-wrap: wrap; }
+    .guess-input-row input { max-width: 100%; }
+    .tools-grid { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+<a href="#main" class="skip-link">Skip to content</a>
+<div class="grain" aria-hidden="true"></div>
+
+<header class="tools-header">
+  <div class="container">
+    <a href="/" class="back-link" aria-label="Back to forgonetokens">&larr; forgonetokens</a>
+    <span class="header-label" aria-hidden="true">TOOLS</span>
+  </div>
+</header>
+
+<main id="main">
+  <div class="container">
+
+    <!-- CMD Palette -->
+    <div class="tool-hero">
+      <div class="tool-hero-header">
+        <img src="../icon.webp" alt="CMD Palette icon" width="40" height="40" decoding="async" />
+        <h2>CMD PALETTE</h2>
+        <span class="tool-hero-badge">macOS menu bar app</span>
+      </div>
+      <div class="tool-story">
+        <p>I kept copy-pasting the same terminal commands. Git incantations, dev server starts, that one process kill command I google every single time. So I built a menu bar app that just... has them.</p>
+        <p>Then I added my projects. Now I click a folder and I'm running a dev server with localhost open. No cd-ing around. No remembering port numbers.</p>
+        <p class="punchline">This is that app.</p>
+      </div>
+    </div>
+
+    <div class="screenshot">
+      <img src="../screenshots/cmd-palette.webp" alt="CMD Palette showing project list and terminal" width="720" height="450" loading="lazy" decoding="async" />
+    </div>
+
+    <div class="features">
+      <div class="section-title">What it does</div>
+
+      <div class="feature-item">
+        <h3>Your projects, one click away.</h3>
+        <p>Point CMD Palette at your repos folder and every project appears instantly. Open a terminal, launch the dev server, or jump to localhost — all from your menu bar.</p>
+      </div>
+
+      <div class="feature-item">
+        <h3>Every command you keep forgetting.</h3>
+        <p>Git commands, process management, dev server shortcuts — searchable and organized. Click to copy. Stop googling "git undo last commit" for the hundredth time.</p>
+      </div>
+
+      <div class="feature-item">
+        <h3>Keyboard-first.</h3>
+        <p><span class="kbd">Cmd+Shift+&lt;</span> opens the palette from anywhere. Arrow keys navigate, left/right picks an action, Enter executes. Mouse optional.</p>
+      </div>
+
+      <div class="feature-item">
+        <h3>One-click dev environments.</h3>
+        <p>Drop a <span class="kbd">.cmdpalette.json</span> in any project to define your dev command and localhost URL. Hit "Dev" — server starts, browser opens, you're coding.</p>
+      </div>
+
+      <div class="feature-item">
+        <h3>Lightweight and native.</h3>
+        <p>Built with Tauri. Lives in your menu bar. ~20MB memory. No Electron bloat, no browser tabs, no subscriptions.</p>
+      </div>
+    </div>
+
+    <!-- Specs -->
+    <ul class="specs">
+      <li>Menu bar app for macOS</li>
+      <li>Global hotkey access</li>
+      <li>Project launcher with dev server detection</li>
+      <li>Auto-opens localhost in browser</li>
+      <li>Searchable command reference</li>
+      <li>Keyboard navigable</li>
+      <li>Per-project .cmdpalette.json config</li>
+      <li>Built with Tauri + Svelte</li>
+    </ul>
+
+    <!-- Unlock Paths -->
+    <section id="get-cmd-palette">
+      <div class="section-title">Get cmd-palette</div>
+      <p class="unlock-intro">No sign-up, no paywall. Just a little challenge — or a little generosity.</p>
+      <div class="unlock-grid">
+        <div class="unlock-card">
+          <h3>Crack the code</h3>
+          <p>Play a round of Mastermind. Guess the 4-digit code and the download unlocks. Takes a few minutes if you're sharp.</p>
+          <button class="btn btn-primary" id="start-puzzle-btn" aria-expanded="false" aria-controls="mastermind">Start Puzzle</button>
+        </div>
+        <div class="unlock-or">or</div>
+        <div class="unlock-card">
+          <h3>Leave a tip</h3>
+          <p>Skip the puzzle — drop $3 and download right away. That's it. No subscription, no account.</p>
+          <a class="btn btn-outline" id="tip-link" href="#" target="_blank" rel="noopener">Tip $3</a>
+        </div>
+      </div>
+
+      <!-- Mastermind Game -->
+      <div class="mastermind-area hidden" id="mastermind">
+        <div class="mm-status" id="mm-status" aria-live="polite">Guess a 4-digit code (digits 0-9, each digit unique). You have unlimited attempts.</div>
+        <div class="mm-legend" id="mm-legend">
+          <span><span class="dot-green" aria-hidden="true">&#9679;</span> Exact = right digit, right place</span>
+          <span><span class="dot-yellow" aria-hidden="true">&#9679;</span> Misplaced = right digit, wrong place</span>
+        </div>
+        <div class="guess-input-row">
+          <input type="text" id="guess-input" maxlength="4" placeholder="1234" autocomplete="off" aria-label="Enter your 4-digit guess" aria-describedby="mm-status mm-legend" inputmode="numeric" pattern="\d{4}" />
+          <button class="btn btn-primary" id="guess-btn">Guess</button>
+        </div>
+        <div class="mm-error" id="mm-error" role="alert"></div>
+        <div class="guess-history" id="guess-history" aria-live="polite"></div>
+        <div class="win-banner hidden" id="win-banner" role="status">
+          You cracked it! Download unlocked below.
+          <div class="win-banner-tip">
+            <a class="btn btn-outline" id="tip-link-win" href="#" target="_blank" rel="noopener">Tip $3 anyway</a>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- Download -->
+    <section>
+      <div class="section-title">Download</div>
+      <div class="download-section locked" id="download-section">
+        <div class="lock-overlay" id="lock-overlay">Crack the code above or leave a $3 tip to unlock this download.</div>
+        <h3 id="dl-heading" class="hidden">cmd-palette</h3>
+        <p id="dl-desc" class="hidden">macOS · Universal binary · Requires macOS 13+</p>
+        <a class="btn btn-green hidden" id="dl-btn" href="../CMD%20Palette_0.1.0_aarch64.dmg" download>Download CMD Palette (.dmg)</a>
+        <button class="license-toggle hidden" id="license-btn" aria-expanded="false" aria-controls="license-text">View License</button>
+        <div class="license-text" id="license-text">MIT License
+
+Copyright (c) 2025
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.</div>
+      </div>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Getting Started -->
+    <section class="guide">
+      <div class="section-title">Getting Started</div>
+
+      <h3>Install</h3>
+      <ol>
+        <li>Open the DMG file</li>
+        <li>Drag CMD Palette to your Applications folder</li>
+        <li>Launch it from Applications — you'll see a small icon in your menu bar. macOS may show a security prompt on first launch (see note below).</li>
+      </ol>
+      <div class="note"><strong>First launch:</strong> macOS will block CMD Palette because it's unsigned. Go to <strong>System Settings &gt; Privacy &amp; Security</strong>, scroll down, and click <strong>Open Anyway</strong>. This only happens once.</div>
+
+      <h3>Set Up Your Projects</h3>
+      <ol>
+        <li>Click the CMD Palette icon in your menu bar to open the palette</li>
+        <li>You'll see a <strong>Set Projects Folder</strong> button at the top — click it</li>
+        <li>A folder picker will open — navigate to the folder where you keep your coding projects (e.g. <code>~/repos</code>)</li>
+        <li>CMD Palette will scan that folder and list every subdirectory as a project</li>
+      </ol>
+      <div class="note">This setting is saved and persists across restarts. You can change it anytime by clicking the gear icon on the Projects header.</div>
+
+      <h3>Launch a Project</h3>
+      <p>Each project in the list has up to three actions:</p>
+      <ul>
+        <li><strong>Terminal</strong> — Opens a new Terminal.app window at the project directory</li>
+        <li><strong>Dev</strong> — Starts the dev server (detected automatically, or configured via <code>.cmdpalette.json</code>)</li>
+        <li><strong>Browser</strong> — Opens the project's localhost URL in your default browser</li>
+      </ul>
+
+      <p>Click any action directly, or use keyboard navigation:</p>
+      <ol>
+        <li>Press <code>Cmd+Shift+&lt;</code> to open the palette from anywhere</li>
+        <li><code>Arrow Down/Up</code> to highlight a project</li>
+        <li><code>Arrow Left/Right</code> to switch between Terminal, Dev, and Browser</li>
+        <li>Press <code>Enter</code> to execute</li>
+      </ol>
+
+      <p>If a project has a <code>.cmdpalette.json</code> file in its root, CMD Palette will use it for the dev command and URL:</p>
+      <pre><code>{
+  "dev": "npm run dev",
+  "url": "http://localhost:3000"
+}</code></pre>
+      <p>Without a config file, CMD Palette auto-detects the dev command from your project files (<code>package.json</code>, <code>Cargo.toml</code>, etc.). Static HTML projects with an <code>index.html</code> get a one-click browser open.</p>
+
+      <h3>Copy Commands</h3>
+      <p>CMD Palette includes a searchable library of common dev commands (git, npm, process management, etc.).</p>
+      <ol>
+        <li>Click a category to expand it, or just start typing in the search bar to filter</li>
+        <li>Click any command to copy it to your clipboard</li>
+        <li>Paste it into your terminal</li>
+      </ol>
+      <p>A green checkmark confirms the copy. Search works across command names, descriptions, and the actual command text.</p>
+
+      <h3>Keyboard Shortcuts</h3>
+      <table class="shortcut-table">
+        <thead>
+          <tr><th>Key</th><th>Action</th></tr>
+        </thead>
+        <tbody>
+          <tr><td><code>Cmd+Shift+&lt;</code></td><td>Open/close palette from anywhere</td></tr>
+          <tr><td><code>Arrow Down/Up</code></td><td>Navigate items</td></tr>
+          <tr><td><code>Arrow Left/Right</code></td><td>Switch project action (Terminal / Dev / Browser)</td></tr>
+          <tr><td><code>Enter</code></td><td>Execute selected item</td></tr>
+          <tr><td><code>Escape</code></td><td>Clear search</td></tr>
+          <tr><td><code>Type anything</code></td><td>Filter commands and projects</td></tr>
+        </tbody>
+      </table>
+    </section>
+
+    <hr class="section-divider">
+
+    <!-- Coming Soon -->
+    <section>
+      <div class="section-title">More tools</div>
+      <div class="tools-grid">
+        <div class="tool-card">
+          <h4>Env Sync</h4>
+          <p>Manage .env files across projects without the mess.</p>
+          <span class="badge">Coming Soon</span>
+        </div>
+        <div class="tool-card">
+          <h4>Port Scout</h4>
+          <p>See what's running on every port. Kill with one click.</p>
+          <span class="badge">Coming Soon</span>
+        </div>
+        <div class="tool-card">
+          <h4>Snip Shelf</h4>
+          <p>Drag-and-drop code snippet manager for your menu bar.</p>
+          <span class="badge">Coming Soon</span>
+        </div>
+      </div>
+    </section>
+
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <a href="/">&larr; Back to the cabinet</a>
+    <div class="copyright">&copy; 2026 devlines</div>
+  </div>
+</footer>
+
+<script>
+  // ── CMD Palette Tools Page ──
+  // IIFE: no global leakage
+
+  (function() {
+    'use strict';
+
+    // ── Constants ──
+    var CODE_LENGTH = 4;
+    var STRIPE_URL = 'https://buy.stripe.com/7sYdR90w58cb75l72r3Nm00';
+    var DIGIT_REGEX = new RegExp('^\\d{' + CODE_LENGTH + '}$');
+
+    // ── Set Stripe URLs ──
+    var tipLink = document.getElementById('tip-link');
+    var tipLinkWin = document.getElementById('tip-link-win');
+    if (tipLink) tipLink.href = STRIPE_URL;
+    if (tipLinkWin) tipLinkWin.href = STRIPE_URL;
+
+    // ── Helpers ──
+
+    function generateCode() {
+      var digits = [0, 1, 2, 3, 4, 5, 6, 7, 8, 9];
+      for (var i = digits.length - 1; i > 0; i--) {
+        var j = Math.floor(Math.random() * (i + 1));
+        var tmp = digits[i];
+        digits[i] = digits[j];
+        digits[j] = tmp;
+      }
+      return digits.slice(0, CODE_LENGTH).map(String);
+    }
+
+    // ── Game State ──
+
+    var secretCode = generateCode();
+    var guesses = [];
+    var solved = false;
+    var unlocked = false;
+
+    // ── Cached DOM References ──
+
+    var puzzleArea = document.getElementById('mastermind');
+    var puzzleToggleBtn = document.getElementById('start-puzzle-btn');
+    var guessInput = document.getElementById('guess-input');
+    var guessBtn = document.getElementById('guess-btn');
+    var guessErrorEl = document.getElementById('mm-error');
+    var guessStatusEl = document.getElementById('mm-status');
+    var guessHistoryEl = document.getElementById('guess-history');
+    var winBanner = document.getElementById('win-banner');
+    var downloadSection = document.getElementById('download-section');
+    var lockOverlay = document.getElementById('lock-overlay');
+    var dlHeading = document.getElementById('dl-heading');
+    var dlDesc = document.getElementById('dl-desc');
+    var dlBtn = document.getElementById('dl-btn');
+    var licenseTextEl = document.getElementById('license-text');
+    var licenseBtnEl = document.getElementById('license-btn');
+
+    // ── Puzzle Visibility ──
+
+    function togglePuzzle() {
+      var isHidden = puzzleArea.classList.contains('hidden');
+      puzzleArea.classList.toggle('hidden');
+      puzzleToggleBtn.textContent = isHidden ? 'Hide Puzzle' : 'Start Puzzle';
+      puzzleToggleBtn.setAttribute('aria-expanded', isHidden ? 'true' : 'false');
+      if (isHidden) guessInput.focus();
+    }
+
+    // ── Guess Submission ──
+
+    function submitGuess() {
+      if (solved) return;
+
+      var raw = guessInput.value.trim();
+      guessErrorEl.textContent = '';
+
+      if (!DIGIT_REGEX.test(raw)) {
+        guessErrorEl.textContent = 'Enter exactly ' + CODE_LENGTH + ' digits.';
+        return;
+      }
+
+      var digits = raw.split('');
+      if (new Set(digits).size !== CODE_LENGTH) {
+        guessErrorEl.textContent = 'Digits must not repeat.';
+        return;
+      }
+
+      // Duplicate guess check
+      for (var g = 0; g < guesses.length; g++) {
+        if (guesses[g].code === raw) {
+          guessErrorEl.textContent = 'You already guessed ' + raw + '.';
+          return;
+        }
+      }
+
+      // Score
+      var exactCount = 0;
+      var misplacedCount = 0;
+      for (var i = 0; i < CODE_LENGTH; i++) {
+        if (digits[i] === secretCode[i]) {
+          exactCount++;
+        } else if (secretCode.indexOf(digits[i]) !== -1) {
+          misplacedCount++;
+        }
+      }
+
+      guesses.push({ code: raw, exactCount: exactCount, misplacedCount: misplacedCount });
+      appendGuessRow(guesses[guesses.length - 1], guesses.length);
+      guessInput.value = '';
+      guessInput.focus();
+
+      guessStatusEl.textContent = 'Attempt #' + guesses.length + ' \u2014 keep going!';
+
+      if (exactCount === CODE_LENGTH) {
+        solved = true;
+        guessBtn.disabled = true;
+        guessInput.disabled = true;
+        guessStatusEl.textContent = 'Cracked in ' + guesses.length + (guesses.length === 1 ? ' attempt!' : ' attempts!');
+        winBanner.classList.remove('hidden');
+        unlockDownload();
+        setTimeout(function() {
+          downloadSection.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        }, 400);
+      }
+    }
+
+    // ── Guess Row Rendering (DOM API, no innerHTML) ──
+
+    function appendGuessRow(guess, num) {
+      var row = document.createElement('div');
+      row.className = 'guess-row';
+
+      var numSpan = document.createElement('span');
+      numSpan.className = 'guess-num';
+      numSpan.textContent = num;
+
+      var codeSpan = document.createElement('span');
+      codeSpan.className = 'guess-code';
+      codeSpan.textContent = guess.code;
+
+      var resultSpan = document.createElement('span');
+      resultSpan.className = 'guess-result';
+
+      var correctSpan = document.createElement('span');
+      correctSpan.className = 'correct';
+      correctSpan.textContent = '\u25CF ' + guess.exactCount + ' exact';
+
+      var separator = document.createTextNode(' \u00B7 ');
+
+      var misplacedSpan = document.createElement('span');
+      misplacedSpan.className = 'misplaced';
+      misplacedSpan.textContent = '\u25CF ' + guess.misplacedCount + ' misplaced';
+
+      resultSpan.appendChild(correctSpan);
+      resultSpan.appendChild(separator);
+      resultSpan.appendChild(misplacedSpan);
+
+      row.appendChild(numSpan);
+      row.appendChild(codeSpan);
+      row.appendChild(resultSpan);
+
+      guessHistoryEl.insertBefore(row, guessHistoryEl.firstChild);
+    }
+
+    // ── Download Unlock ──
+
+    function unlockDownload() {
+      if (unlocked) return;
+      unlocked = true;
+
+      downloadSection.classList.remove('locked');
+      lockOverlay.classList.add('hidden');
+      dlHeading.classList.remove('hidden');
+      dlDesc.classList.remove('hidden');
+      dlBtn.classList.remove('hidden');
+      licenseBtnEl.classList.remove('hidden');
+    }
+
+    // ── License Toggle ──
+
+    function toggleLicense() {
+      var isOpen = licenseTextEl.classList.toggle('open');
+      licenseBtnEl.setAttribute('aria-expanded', isOpen);
+    }
+
+    // ── Event Listeners ──
+
+    puzzleToggleBtn.addEventListener('click', togglePuzzle);
+    guessBtn.addEventListener('click', submitGuess);
+    guessInput.addEventListener('keydown', function(e) {
+      if (e.key === 'Enter') submitGuess();
+    });
+    licenseBtnEl.addEventListener('click', toggleLicense);
+
+    // ── Init ──
+
+    if (new URLSearchParams(window.location.search).has('paid')) {
+      unlockDownload();
+      var unlockGrid = document.querySelector('.unlock-grid');
+      if (unlockGrid) unlockGrid.classList.add('hidden');
+      var unlockIntro = document.querySelector('.unlock-intro');
+      if (unlockIntro) unlockIntro.textContent = 'Thanks for your support! Your download is unlocked below.';
+    }
+  })();
+</script>
+
+</body>
+</html>
