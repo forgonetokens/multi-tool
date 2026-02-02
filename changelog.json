@@ -2,37 +2,101 @@
   {
     "id": 1,
     "hash": "079c67b",
-    "text": "The arcade opens — CMD Palette lands with Mastermind, Stripe tips, and a single-file architecture",
+    "text": "CMD Palette — a browser extension born as a single HTML file",
     "link": "/tools/",
     "date": "2026-01-31",
     "category": "feature"
   },
   {
     "id": 2,
+    "hash": "079c67b",
+    "text": "Mastermind game — crack the code to unlock the download",
+    "link": "/tools/",
+    "date": "2026-01-31",
+    "category": "feature"
+  },
+  {
+    "id": 3,
+    "hash": "079c67b",
+    "text": "Stripe tips — pay what you want, or don't",
+    "link": "/tools/",
+    "date": "2026-01-31",
+    "category": "integration"
+  },
+  {
+    "id": 4,
     "hash": "99ed221",
-    "text": "Four agents sweep through — skip links, contrast fixes, image compression, mobile polish",
+    "text": "Skip links and ARIA labels sweep through the markup",
     "link": "/",
     "date": "2026-01-31",
     "category": "a11y"
   },
   {
-    "id": 3,
+    "id": 5,
+    "hash": "99ed221",
+    "text": "Image pipeline — icons and screenshots compressed by 95%",
+    "link": "/",
+    "date": "2026-01-31",
+    "category": "feature"
+  },
+  {
+    "id": 6,
+    "hash": "99ed221",
+    "text": "Mobile layout goes full-bleed — cabinet fills the viewport",
+    "link": "/",
+    "date": "2026-01-31",
+    "category": "design"
+  },
+  {
+    "id": 7,
     "hash": "ebaf3f3",
-    "text": "forgonetokens.com goes live — custom domain wired to GitHub Pages",
+    "text": "forgonetokens.com goes live — custom domain wired to Pages",
     "link": "/",
     "date": "2026-02-01",
     "category": "integration"
   },
   {
-    "id": 4,
+    "id": 8,
     "hash": "536a0b4",
-    "text": "The Single Cabinet — full rebrand to amber CRT arcade with scanlines and grain",
+    "text": "The Single Cabinet — amber CRT arcade replaces the old landing page",
     "link": "/",
     "date": "2026-02-01",
     "category": "design"
   },
   {
-    "id": 5,
+    "id": 9,
+    "hash": "536a0b4",
+    "text": "Scanlines and grain — CRT texture layered over the screen",
+    "link": "/",
+    "date": "2026-02-01",
+    "category": "design"
+  },
+  {
+    "id": 10,
+    "hash": "536a0b4",
+    "text": "Typing effect — the marquee title writes itself on load",
+    "link": "/",
+    "date": "2026-02-01",
+    "category": "feature"
+  },
+  {
+    "id": 11,
+    "hash": "536a0b4",
+    "text": "Ghost cabinets flank the edges — blurred silhouettes in the void",
+    "link": "/",
+    "date": "2026-02-01",
+    "category": "design"
+  },
+  {
+    "id": 12,
+    "hash": "536a0b4",
+    "text": "Screen glow breathes on a 4-second cycle",
+    "link": "/",
+    "date": "2026-02-01",
+    "category": "design"
+  },
+  {
+    "id": 13,
     "hash": "8e11961",
     "text": "CONNECT routes to the Forkiverse",
     "link": "/",
@@ -40,9 +104,17 @@
     "category": "fix"
   },
   {
-    "id": 6,
+    "id": 14,
     "hash": "a81a070",
     "text": "Constellation changelog — project history rendered as a star map",
+    "link": "/changelog/",
+    "date": "2026-02-02",
+    "category": "feature"
+  },
+  {
+    "id": 15,
+    "hash": "a81a070",
+    "text": "Four agents coordinated via bulletin board — design, UX, performance, quality",
     "link": "/changelog/",
     "date": "2026-02-02",
     "category": "feature"

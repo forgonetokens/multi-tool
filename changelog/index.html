@@ -299,18 +299,25 @@
   /* Ambient floating particles */
   .particle {
     position: absolute;
-    width: 2px;
-    height: 2px;
     background: var(--amber-dim);
     border-radius: 50%;
-    opacity: 0.3;
-    animation: drift 20s linear infinite;
+    animation: drift linear infinite;
+  }
+
+  .particle--lg {
+    width: 3px;
+    height: 3px;
+  }
+
+  .particle--sm {
+    width: 2px;
+    height: 2px;
   }
 
   @keyframes drift {
     0% { transform: translateY(100vh) translateX(0); opacity: 0; }
-    10% { opacity: 0.3; }
-    90% { opacity: 0.3; }
+    10% { opacity: var(--p-opacity, 0.3); }
+    90% { opacity: var(--p-opacity, 0.3); }
     100% { transform: translateY(-100px) translateX(50px); opacity: 0; }
   }
 
@@ -386,24 +393,16 @@ const loadingMsg = document.querySelector('.loading-message');
 
 let changes = [];
 
-// Calculate age tier from date string
-// 0 = today, 1 = 1-3d, 2 = 4-7d, 3 = 8-14d, 4 = 15-30d, 5 = 31+d
-function calculateAge(dateStr) {
-  try {
-    var entryDate = new Date(dateStr + 'T00:00:00');
-    var now = new Date();
-    now.setHours(0, 0, 0, 0);
-    entryDate.setHours(0, 0, 0, 0);
-    var diffDays = Math.floor((now - entryDate) / (1000 * 60 * 60 * 24));
-    if (diffDays <= 0) return 0;
-    if (diffDays <= 3) return 1;
-    if (diffDays <= 7) return 2;
-    if (diffDays <= 14) return 3;
-    if (diffDays <= 30) return 4;
-    return 5;
-  } catch (e) {
-    return 5; // fallback to oldest tier
-  }
+// Assign visual tier based on rank in sorted list
+// Ensures full gradient even when dates are clustered
+// Tier 0: entries 1-2, Tier 1: 3-4, Tier 2: 5-6, Tier 3: 7-10, Tier 4: 11-15, Tier 5: 16+
+function assignRankTier(index) {
+  if (index < 2) return 0;
+  if (index < 4) return 1;
+  if (index < 6) return 2;
+  if (index < 10) return 3;
+  if (index < 15) return 4;
+  return 5;
 }
 
 // Fetch changelog data
@@ -420,9 +419,9 @@ async function loadChangelog() {
       return b.id - a.id;
     });
 
-    // Assign age based on date distance from today
-    changes = entries.map(function(entry) {
-      return Object.assign({}, entry, { age: calculateAge(entry.date) });
+    // Assign visual tier based on rank (ensures spread even with clustered dates)
+    changes = entries.map(function(entry, i) {
+      return Object.assign({}, entry, { age: assignRankTier(i) });
     });
 
     loadingMsg.remove();
@@ -501,20 +500,23 @@ function positionNodes() {
 
   var positions = [];
 
-  changes.forEach(function(change, i) {
-    // Base distance from center increases with age
-    var baseDistance = 80 + (change.age * 60) + (Math.random() * 100);
+  // Golden angle for natural spiral distribution
+  var goldenAngle = Math.PI * (3 - Math.sqrt(5)); // ~137.5 degrees
 
-    // Angle with some randomness, spiral outward
-    var angle = (i / changes.length) * Math.PI * 2.5 + (Math.random() * 0.5);
+  changes.forEach(function(change, i) {
+    // Base distance from center increases with age, higher minimum
+    var baseDistance = 120 + (change.age * 70) + (Math.random() * 100);
+
+    // Golden angle spiral with slight randomness to avoid rigid patterns
+    var angle = i * goldenAngle + (Math.random() * 0.4 - 0.2);
 
     // Calculate position
     var x = centerX + Math.cos(angle) * baseDistance;
     var y = centerY + Math.sin(angle) * baseDistance;
 
-    // Add jitter
-    x += (Math.random() - 0.5) * 80;
-    y += (Math.random() - 0.5) * 60;
+    // Wider jitter for more spread
+    x += (Math.random() - 0.5) * 150;
+    y += (Math.random() - 0.5) * 120;
 
     // Clamp to viewport with padding
     var pad = 100;
@@ -581,21 +583,29 @@ function positionNodes() {
 function drawConnections(positions) {
   svg.innerHTML = '';
 
-  for (let i = 0; i < positions.length; i++) {
-    for (let j = i + 1; j < positions.length; j++) {
-      const a = positions[i];
-      const b = positions[j];
+  // Track connection count per node (max 3)
+  var maxConns = 3;
+  var connCount = {};
+  positions.forEach(function(p) { connCount[p.change.id] = 0; });
 
-      const dx = b.x - a.x;
-      const dy = b.y - a.y;
-      const distance = Math.sqrt(dx * dx + dy * dy);
+  for (var i = 0; i < positions.length; i++) {
+    for (var j = i + 1; j < positions.length; j++) {
+      var a = positions[i];
+      var b = positions[j];
+
+      // Skip if either node is at capacity
+      if (connCount[a.change.id] >= maxConns || connCount[b.change.id] >= maxConns) continue;
+
+      var dx = b.x - a.x;
+      var dy = b.y - a.y;
+      var distance = Math.sqrt(dx * dx + dy * dy);
 
       // Connect if close enough and age difference is small
-      const ageDiff = Math.abs(a.change.age - b.change.age);
-      const maxDist = 250 - (ageDiff * 30);
+      var ageDiff = Math.abs(a.change.age - b.change.age);
+      var maxDist = 250 - (ageDiff * 30);
 
       if (distance < maxDist && ageDiff <= 2) {
-        const line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
+        var line = document.createElementNS('http://www.w3.org/2000/svg', 'line');
         line.setAttribute('x1', a.x + 50);
         line.setAttribute('y1', a.y + 10);
         line.setAttribute('x2', b.x + 50);
@@ -603,10 +613,12 @@ function drawConnections(positions) {
         line.setAttribute('class', 'connection-line');
 
         // Fade lines based on combined age
-        const avgAge = (a.change.age + b.change.age) / 2;
+        var avgAge = (a.change.age + b.change.age) / 2;
         line.style.opacity = 0.2 - (avgAge * 0.03);
 
         svg.appendChild(line);
+        connCount[a.change.id]++;
+        connCount[b.change.id]++;
       }
     }
   }
@@ -615,13 +627,19 @@ function drawConnections(positions) {
 // Add ambient particles (skip entirely if user prefers reduced motion)
 function addParticles() {
   if (prefersReducedMotion) return;
-  for (let i = 0; i < 15; i++) {
+  for (var i = 0; i < 25; i++) {
     var particle = document.createElement('div');
-    particle.className = 'particle';
+    var isLarge = Math.random() > 0.6;
+    particle.className = 'particle ' + (isLarge ? 'particle--lg' : 'particle--sm');
     particle.setAttribute('aria-hidden', 'true');
     particle.style.left = Math.random() * 100 + 'vw';
+    // Varied opacity: 0.15–0.5
+    var opacity = 0.15 + Math.random() * 0.35;
+    particle.style.setProperty('--p-opacity', opacity);
     particle.style.animationDelay = Math.random() * 20 + 's';
-    particle.style.animationDuration = (15 + Math.random() * 10) + 's';
+    // Two speed tiers: fast (15–25s) and slow (28–38s) for depth parallax
+    var isSlow = Math.random() > 0.6;
+    particle.style.animationDuration = (isSlow ? 28 + Math.random() * 10 : 15 + Math.random() * 10) + 's';
     constellation.appendChild(particle);
   }
 }
