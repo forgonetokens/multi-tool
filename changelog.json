@@ -3,7 +3,7 @@
     "id": 1,
     "hash": "079c67b",
     "text": "CMD Palette",
-    "description": "A browser extension born as a single HTML file",
+    "description": "A Tauri app for managing custom software and terminal commands",
     "link": "/tools/",
     "date": "2026-01-31",
     "category": "feature"
