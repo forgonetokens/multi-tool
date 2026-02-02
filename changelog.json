@@ -2,15 +2,15 @@
   {
     "id": 1,
     "hash": "079c67b",
-    "text": "Initial release — multi-tool site with CMD Palette",
-    "link": "/",
+    "text": "The arcade opens — CMD Palette lands with Mastermind, Stripe tips, and a single-file architecture",
+    "link": "/tools/",
     "date": "2026-01-31",
     "category": "feature"
   },
   {
     "id": 2,
     "hash": "99ed221",
-    "text": "Improve accessibility, performance, mobile UX, and code quality",
+    "text": "Four agents sweep through — skip links, contrast fixes, image compression, mobile polish",
     "link": "/",
     "date": "2026-01-31",
     "category": "a11y"
@@ -18,7 +18,7 @@
   {
     "id": 3,
     "hash": "ebaf3f3",
-    "text": "Create CNAME",
+    "text": "forgonetokens.com goes live — custom domain wired to GitHub Pages",
     "link": "/",
     "date": "2026-02-01",
     "category": "integration"
@@ -26,7 +26,7 @@
   {
     "id": 4,
     "hash": "536a0b4",
-    "text": "Rebrand to The Single Cabinet — arcade cabinet portal with amber palette",
+    "text": "The Single Cabinet — full rebrand to amber CRT arcade with scanlines and grain",
     "link": "/",
     "date": "2026-02-01",
     "category": "design"
@@ -34,9 +34,17 @@
   {
     "id": 5,
     "hash": "8e11961",
-    "text": "Update CONNECT link to Forkiverse profile",
+    "text": "CONNECT routes to the Forkiverse",
     "link": "/",
     "date": "2026-02-01",
     "category": "fix"
+  },
+  {
+    "id": 6,
+    "hash": "a81a070",
+    "text": "Constellation changelog — project history rendered as a star map",
+    "link": "/changelog/",
+    "date": "2026-02-02",
+    "category": "feature"
   }
 ]
